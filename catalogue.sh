@@ -1,22 +1,50 @@
- curl -sL https://rpm.nodesource.com/setup_lts.x | bash
- yum install nodejs -y
- useradd roboshop
- mkdir /app 
- rm -rf /app/* 
- curl -L -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue.zip 
- cd /app 
- unzip /tmp/catalogue.zip
- cd /app 
- npm install 
- cp Configs/catalogue.service /etc/systemd/system/catalogue.service
+ source common.sh
  
- systemctl daemon-reload
- systemctl enable catalogue 
- systemctl start catalogue
+ print_head "Configure NodeJS Repo"
+ curl -sL https://rpm.nodesource.com/setup_lts.x | bash &>>${log_file}
  
- cp Configs/mongodb.repo /etc/yum.repos.d/mongo.repo
- yum install mongodb-org-shell -y
- mongo --host mongodb.dreamhigher.online </app/schema/catalogue.js
+ print_head "Install Node JS"
+ yum install nodejs -y &>>${log_file}
+ 
+ print_head "Create Roboshop user"
+ useradd roboshop &>>${log_file}
+ 
+ print_head "Create application directory"
+ mkdir /app &>>${log_file}
+ 
+ print_head "Delete old content"
+ rm -rf /app/* &>>${log_file}
+ 
+ print_head "Downloading app content"
+ curl -L -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue.zip &>>${log_file}
+ cd /app 
+ 
+ print_head "Extracting App content"
+ unzip /tmp/catalogue.zip &>>${log_file}
+ 
+ print_head "Installing Node JS dependencies"
+ npm install &>>${log_file}
+ 
+ print_head "Copy systemd service file"
+ cp Configs/catalogue.service /etc/systemd/system/catalogue.service &>>${log_file}
+ 
+ print_head "Reload systemd"
+ systemctl daemon-reload &>>${log_file}
+ 
+ print_head "Enable catalogue service"
+ systemctl enable catalogue &>>${log_file}
+ 
+ print_head "Start catalogue service"
+ systemctl start catalogue &>>${log_file}
+ 
+ print_head "Copy mongodb repo file"
+ cp Configs/mongodb.repo /etc/yum.repos.d/mongo.repo &>>${log_file}
+ 
+ print_head "Install Mongodb client"
+ yum install mongodb-org-shell -y &>>${log_file}
+ 
+ print_head "Load Schema"
+ mongo --host mongodb.dreamhigher.online </app/schema/catalogue.js &>>${log_file}
  
  
  
