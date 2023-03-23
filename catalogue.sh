@@ -35,7 +35,7 @@
  systemctl enable catalogue &>>${log_file}
  
  print_head "Start catalogue service"
- systemctl start catalogue &>>${log_file}
+ systemctl restart catalogue &>>${log_file}
  
  print_head "Copy mongodb repo file"
  cp ${code_dir}/Configs/mongodb.repo /etc/yum.repos.d/mongo.repo &>>${log_file}
