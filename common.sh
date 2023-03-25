@@ -15,3 +15,73 @@ status_check() {
         exit 1
     fi
 }
+
+nodejs() {
+ 
+ print_head "Configure NodeJS Repo"
+ curl -sL https://rpm.nodesource.com/setup_lts.x | bash &>>${log_file}
+ status_check $?
+ 
+ print_head "Install Node JS"
+ yum install nodejs -y &>>${log_file}
+ status_check $?
+ 
+ print_head "Create Roboshop user"
+ id roboshop &>>${log_file}
+ if [ $? -ne 0 ] ; then
+  useradd roboshop &>>${log_file}
+ fi
+ status_check $?
+ 
+ print_head "Create application directory"
+ if [ ! -d /app ] ; then
+  mkdir /app &>>${log_file}
+ fi
+ status_check $?
+ 
+ print_head "Delete old content"
+ rm -rf /app/* &>>${log_file}
+ status_check $?
+ 
+ print_head "Downloading app content"
+ curl -L -o /tmp/${component}.zip https://roboshop-artifacts.s3.amazonaws.com/${component}.zip &>>${log_file}
+ status_check $?
+ cd /app 
+ 
+ print_head "Extracting App content"
+ unzip /tmp/${component}.zip &>>${log_file}
+ status_check $?
+ 
+ print_head "Installing Node JS dependencies"
+ npm install &>>${log_file}
+ status_check $?
+ 
+ print_head "Copy systemd service file"
+ cp ${code_dir}/Configs/${component}.service /etc/systemd/system/${component}.service &>>${log_file}
+ status_check $?
+ 
+ print_head "Reload systemd"
+ systemctl daemon-reload &>>${log_file}
+ status_check $?
+ 
+ print_head "Enable user service"
+ systemctl enable ${component} &>>${log_file}
+ status_check $?
+ 
+ print_head "Start user service"
+ systemctl restart ${component} &>>${log_file}
+ status_check $?
+ 
+ print_head "Copy mongodb repo file"
+ cp ${code_dir}/Configs/mongodb.repo /etc/yum.repos.d/mongo.repo &>>${log_file}
+ status_check $?
+ 
+ print_head "Install Mongodb client"
+ yum install mongodb-org-shell -y &>>${log_file}
+ status_check $?
+ 
+ print_head "Load Schema"
+ mongo --host mongodb.dreamhigher.online </app/schema/${component}.js &>>${log_file}
+ status_check $?
+
+}
