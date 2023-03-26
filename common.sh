@@ -60,7 +60,7 @@ schema_setup() {
     
     print_head "Load schema"
     mysql -h mysql.dreamhigher.online -uroot -p${mysql_root_password} < /app/schema/${component}.sql &>>${log_file}
-    
+ fi
 }
 
 app_prereq_setup() {
